@@ -14,7 +14,7 @@ class Taxi:
         self.x = 50
         self.y = Game.height / 2
         self.speed = 10
-        self.dir = ''
+        self.dir = 0
         self.image = pygame.image.load('assets/img/taxi.png')
         self.area = Game.dsply.blit(self.image, (self.x, self.y))
         
@@ -22,12 +22,11 @@ class Taxi:
         self.area = Game.dsply.blit(self.image, (self.x, self.y))
         
     def move(self):
-        if self.dir == 'b':
-            self.y -= self.speed
-            
-        elif self.dir == 't':
-            self.y += self.speed
-          
+        if self.y <= Game.height - 120 or self.y >= 120:
+            self.y -= self.dir * self.speed
+            self.y = min(self.y, Game.height - 100)
+            self.y = max(self.y, 0)
+
             
 class Car:
     cars_pic=['car1.png', 'car2.png', 'car3.png', 'car4.png', 'car5.png', 'car6.png']
@@ -58,7 +57,7 @@ class Game:
     font_go = pygame.font.Font('assets/font/atari_full.ttf', 32)
     font_pak = pygame.font.Font('assets/font/atari_full.ttf', 12)
 
-    s = DistanceSensor(23, 24)
+    s = DistanceSensor(echo=23, trigger=24, queue_len=5)
 
     def update(self):
         Game.bgY1 -= Game.movingLeftSpeed
@@ -83,18 +82,21 @@ class Game:
             sensor_distance_pre = sensor_distance
             sensor_distance = Game.s.distance
 
-            print(sensor_distance)
+            d = sensor_distance - sensor_distance_pre
+            print(d)
 
-            if sensor_distance - sensor_distance_pre < -0.001:
-                taxi.dir = 't'
-            elif sensor_distance - sensor_distance_pre > 0.001:
-                taxi.dir = 'b'
+            if d < -0.01:
+                taxi.dir = -1
+            elif d > 0.01:
+                taxi.dir = 1
+            else:
+                taxi.dir = 0
 
             Game.dsply.blit(Game.bg, (0, 0))
             Game.update(Game)
             Game.render(Game)
 
-            if random.random() < 0.01:
+            if random.random() < 0.02:
                 cars.append(Car())
                 
             for car in cars:
@@ -119,6 +121,7 @@ class Game:
                                 exit()
                             elif event.type == pygame.KEYDOWN:
                                 Game.play()
+            
             Car.speed += 0.005   
             taxi.show()
             taxi.move()
