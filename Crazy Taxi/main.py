@@ -12,7 +12,7 @@ class Color:
 class Taxi:
     def __init__(self):
         self.x = 50
-        self.y = Game.height / 2
+        self.y = 420
         self.speed = 10
         self.dir = 0
         self.image = pygame.image.load('assets/img/taxi.png')
@@ -20,12 +20,6 @@ class Taxi:
         
     def show(self):
         self.area = Game.dsply.blit(self.image, (self.x, self.y))
-        
-    def move(self):
-        if self.y <= Game.height - 120 or self.y >= 120:
-            self.y -= self.dir * self.speed
-            self.y = min(self.y, Game.height - 100)
-            self.y = max(self.y, 0)
 
             
 class Car:
@@ -79,18 +73,16 @@ class Game:
 
         while True:
 
-            sensor_distance_pre = sensor_distance
             sensor_distance = Game.s.distance
 
-            d = sensor_distance - sensor_distance_pre
-            print(d)
-
-            if d < -0.01:
-                taxi.dir = -1
-            elif d > 0.01:
-                taxi.dir = 1
+            if 0.1 > sensor_distance:
+                taxi.y = 640
+                
+            elif 0.2 > sensor_distance:
+                taxi.y = 420
             else:
-                taxi.dir = 0
+                taxi.y = 210
+            
 
             Game.dsply.blit(Game.bg, (0, 0))
             Game.update(Game)
@@ -124,7 +116,6 @@ class Game:
             
             Car.speed += 0.005   
             taxi.show()
-            taxi.move()
             pygame.display.update()
             Game.clock.tick(Game.fps)
 
